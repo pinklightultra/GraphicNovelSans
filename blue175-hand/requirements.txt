@@ -1,0 +1,5 @@
+numpy>=1.24
+pillow>=9.1
+fonttools>=4.40
+uharfbuzz>=0.37
+brotli

@@ -1,0 +1,22 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# Pytest / testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local build outputs
+output_fonts/
+examples/output_fonts/
+examples/artist_filled_sheet.png
+examples/lettering_template.png
+out/

@@ -1,0 +1,79 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>BLUE175 Hand, installed</title>
+<!--
+  A real editing surface, and a check that the font actually resolved.
+
+  Word showed "BLUE175 Hand" in its font box while rendering a substituted face,
+  because it had been running since before the install. A font name echoed back by
+  an application is not evidence the application found the font. So this page
+  measures: it renders the same string twice, once asking for the family and once
+  asking for a font that cannot exist, and reports whether the widths differ.
+-->
+<style>
+  body { font: 15px/1.5 "Segoe UI", system-ui, sans-serif; color: #222;
+         margin: 0; padding: 28px 34px; background: #fff; }
+  h1 { font: 400 34px/1.2 "BLUE175 Hand", cursive; color: #1e2840; margin: 0 0 4px; }
+  .note { color: #777; max-width: 62em; margin: 0 0 18px; }
+  .label { color: #888; font-size: 12px; text-transform: uppercase;
+           letter-spacing: .06em; margin: 14px 0 2px; }
+  .spec { font-family: "BLUE175 Hand", cursive; font-size: 27px; color: #1e2840;
+          border: 0; outline: 0; padding: 2px 0; }
+  .spec:focus { background: #f4f7ff; }
+  .b { font-weight: 700 } .i { font-style: italic }
+  #probe { margin-top: 22px; padding: 12px 14px; border-radius: 6px;
+           font-family: Consolas, monospace; font-size: 13px; white-space: pre; }
+  .ok { background: #e8f6ec; color: #14532d; }
+  .bad { background: #fdecec; color: #7f1d1d; }
+</style>
+
+<h1>BLUE175 Hand, installed and editable here.</h1>
+<p class="note">Every line below is <b>contenteditable</b>. Click into one and type.
+This is the OS-installed family being resolved by name, with no <code>@font-face</code>
+and no font file served to the page, so anything that renders is coming from the
+install rather than from this document.</p>
+
+<div class="label">Regular</div>
+<div class="spec" contenteditable spellcheck="false">The quick brown fox jumps over the lazy dog</div>
+<div class="label">Bold</div>
+<div class="spec b" contenteditable spellcheck="false">The quick brown fox jumps over the lazy dog</div>
+<div class="label">Italic</div>
+<div class="spec i" contenteditable spellcheck="false">The quick brown fox jumps over the lazy dog</div>
+<div class="label">Bold italic</div>
+<div class="spec b i" contenteditable spellcheck="false">The quick brown fox jumps over the lazy dog</div>
+<div class="label">Digits, and the three the source cannot fix: 5 sets as S, 8 as b, 1 as l</div>
+<div class="spec" contenteditable spellcheck="false">0123456789 $127.00 in 2018 11:15 25%</div>
+<div class="label">Kerned pairs</div>
+<div class="spec" contenteditable spellcheck="false">Wavy AVAST To Yo. rye f, P, ry we vy 7, 2.</div>
+<div class="label">Type here</div>
+<div class="spec" contenteditable spellcheck="false">&nbsp;</div>
+
+<div id="probe"></div>
+<script>
+  const FAM = "BLUE175 Hand";
+  const S = "Wavy AVAST 2018 Handwriting";
+
+  // Width against a family that cannot exist, so the fallback is identical in
+  // both measurements and any difference is the real face being used.
+  function width(stack) {
+    const c = document.createElement("canvas").getContext("2d");
+    c.font = "48px " + stack;
+    return c.measureText(S).width;
+  }
+  const mine = width('"' + FAM + '", monospace');
+  const none = width('"NoSuchFace-' + Date.now() + '", monospace');
+  const differs = Math.abs(mine - none) > 0.5;
+  const checked = document.fonts.check('48px "' + FAM + '"');
+
+  const lines = [
+    "family requested        " + FAM,
+    "document.fonts.check    " + checked,
+    "width vs fallback       " + mine.toFixed(1) + "px vs " + none.toFixed(1) + "px",
+    "resolved to the family  " + differs,
+  ];
+  const p = document.getElementById("probe");
+  p.className = (differs && checked) ? "ok" : "bad";
+  p.textContent = lines.join("\n") + "\n\n" + ((differs && checked)
+    ? "PASS - the OS resolved the installed family, this is not a substituted face."
+    : "FAIL - this browser is falling back. It was most likely started before the font was installed.");
+</script>

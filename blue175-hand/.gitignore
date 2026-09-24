@@ -1,0 +1,4 @@
+out/
+pages/
+__pycache__/
+.pytest_cache/

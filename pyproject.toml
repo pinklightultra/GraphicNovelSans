@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "graphicnovelsans"
+version = "1.0.0"
+description = "A font creation library for comic artists to turn hand-lettered drawings into 4-style TrueType/WOFF2 font families."
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Justin Severn", email = "justinsevern@gmail.com"}
+]
+keywords = ["comic", "font", "typography", "handwriting", "graphic-novel", "lettering", "opentype", "truetype"]
+dependencies = [
+    "numpy>=1.24",
+    "pillow>=9.1",
+    "fonttools>=4.40",
+    "uharfbuzz>=0.37",
+    "brotli>=1.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0",
+]
+
+[project.scripts]
+graphicnovelsans = "graphicnovelsans.cli:main"
+comicfont = "graphicnovelsans.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["graphicnovelsans*"]
