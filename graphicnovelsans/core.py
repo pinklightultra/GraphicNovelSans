@@ -1,4 +1,15 @@
-"""Main ComicFont class orchestrator."""
+"""Main ComicFont class orchestrator.
+
+This module provides the high-level `ComicFont` class, which serves as the
+primary entry point for users. It abstracts away the complexity of image
+processing, glyph synthesis, and font compilation into a simple, intuitive API.
+
+Workflow:
+    1. Instantiate `ComicFont` with metadata.
+    2. Load glyphs via `load_lettering_sheet()` or `add_glyph()`.
+    3. Optionally call `synthesize_missing()` for rare characters.
+    4. Call `build()` to generate the font family.
+"""
 import os
 from typing import Dict, List, Tuple, Any, Optional, Union
 import numpy as np
@@ -12,11 +23,31 @@ from .template import generate_lettering_sheet, extract_from_lettering_sheet
 
 
 class ComicFont:
-    """High-level Comic Font Generator.
+    """High-level orchestrator for comic font generation.
 
-    Allows comic artists, illustrators, and letterers to turn handwriting
-    drawings into a complete 4-style TrueType / WOFF2 font family with
-    automatic bold dilation, slant-calibrated italic, and band-gap kerning.
+    This is the main public API. It allows artists to transform hand-drawn
+    lettering into a professional 4-style font family (Regular, Bold, Italic,
+    Bold Italic) with automatic kerning and glyph synthesis.
+
+    Attributes:
+        family_name: Font family name (used in metadata and filenames).
+        designer: Author credit for the font.
+        version: Semantic version string.
+        ink_mode: Default ink extraction mode.
+        glyphs: Internal dictionary of extracted glyphs.
+
+    Example:
+        >>> from graphicnovelsans import ComicFont
+        >>> font = ComicFont("My Hand", "Alice", ink_mode="blue_pencil_drop")
+        >>> count = font.load_lettering_sheet("sheet.png")
+        >>> print(f"Loaded {count} glyphs")
+        Loaded 52
+        >>> synthesized = font.synthesize_missing()
+        >>> print(f"Synthesized: {synthesized}")
+        Synthesized: [')', 'q', 'z']
+        >>> result = font.build("./fonts")
+        >>> print(result['family'])
+        My Hand
     """
 
     def __init__(
@@ -38,7 +69,25 @@ class ComicFont:
         image_or_mask: Union[str, Image.Image, np.ndarray],
         ink_mode: Optional[str] = None
     ) -> None:
-        """Add a single character's ink drawing to the font."""
+        """Add a single character drawing to the font.
+
+        Extracts an ink mask from the provided image, tightens it to the
+        bounding box, and stores it in the glyph collection.
+
+        Args:
+            char: Single character string (e.g., "A", "a", "!", ".").
+            image_or_mask: Path to image file, PIL Image, numpy array, or
+                           pre-extracted boolean mask.
+            ink_mode: Override the default ink extraction mode for this glyph.
+
+        Raises:
+            ValueError: If no ink is detected in the provided image.
+            FileNotFoundError: If `image_or_mask` is a non-existent path.
+
+        Example:
+            >>> font.add_glyph("A", "letter_A.png")
+            >>> font.add_glyph("!", mask_array)
+        """
         mode = ink_mode or self.ink_mode
         if isinstance(image_or_mask, np.ndarray) and image_or_mask.dtype == bool:
             mask = image_or_mask
@@ -64,18 +113,49 @@ class ComicFont:
     ) -> int:
         """Extract all characters from a filled lettering template sheet.
 
+        Automatically segments the image into individual character cells,
+        extracts ink masks, and populates the glyph collection.
+
+        Args:
+            sheet_path: Path to the filled sheet image or a PIL Image object.
+            all_caps: Must match the template layout used.
+            ink_mode: Ink extraction strategy (default: `blue_pencil_drop`).
+
         Returns:
-            Count of successfully extracted characters.
+            Number of characters successfully extracted.
+
+        Raises:
+            ValueError: If no characters are found in the sheet.
+
+        Example:
+            >>> font = ComicFont()
+            >>> count = font.load_lettering_sheet("filled_sheet.png")
+            >>> print(f"Extracted {count} glyphs")
+            Extracted 52
         """
         extracted = extract_from_lettering_sheet(sheet_path, all_caps=all_caps, ink_mode=ink_mode)
         self.glyphs.update(extracted)
         return len(extracted)
 
     def synthesize_missing(self) -> List[str]:
-        """Automatically synthesize missing characters (q from p, ) from (, etc.).
+        """Automatically synthesize missing characters from existing glyphs.
+
+        Applies heuristic rules to generate rare or omitted characters:
+        - Mirroring: `)` from `(`, `q` from `p`.
+        - Case copying: `z` from `Z`, etc.
+        - Stacking: `;` from `.` + `,`.
+
+        Modifies `self.glyphs` in-place and returns the list of new characters.
 
         Returns:
-            List of newly synthesized character strings.
+            Sorted list of newly synthesized character strings.
+
+        Example:
+            >>> font = ComicFont()
+            >>> font.load_lettering_sheet("partial_sheet.png")  # Missing q, ), ;
+            >>> synthesized = font.synthesize_missing()
+            >>> print(synthesized)
+            [')', ';', 'q']
         """
         before = set(self.glyphs.keys())
         self.glyphs = synthesize_missing_glyphs(self.glyphs)
@@ -88,15 +168,36 @@ class ComicFont:
         styles: Optional[List[str]] = None,
         auto_synthesize: bool = True
     ) -> Dict[str, Any]:
-        """Build desktop TrueType and web WOFF2 fonts with dual kerning tables.
+        """Build a complete 4-style font family (TTF + WOFF2).
+
+        Orchestrates the full pipeline:
+        1. Synthesizes missing glyphs (if enabled).
+        2. Vectorizes all glyphs.
+        3. Computes sidebearings and kerning pairs.
+        4. Generates Regular, Bold, Italic, and Bold Italic styles.
+        5. Outputs both `.ttf` and `.woff2` files.
 
         Args:
-            output_dir: Directory where fonts will be saved.
-            styles: Styles to generate (default: Regular, Bold, Italic, Bold Italic).
-            auto_synthesize: If True, automatically synthesizes missing glyphs before building.
+            output_dir: Destination directory (created if it doesn't exist).
+            styles: List of styles to generate. Default: all 4 RIBBI styles.
+            auto_synthesize: Whether to synthesize missing glyphs first.
 
         Returns:
-            Dictionary with build metadata and output file paths.
+            Dictionary with keys:
+            - `family`: Font family name.
+            - `styles`: Dict of style name → file paths and metrics.
+            - `output_dir`: Output directory path.
+            - `natural_slant_degrees`: Measured handwriting slant.
+
+        Raises:
+            ValueError: If no glyphs have been added.
+
+        Example:
+            >>> font = ComicFont("My Hand", "Alice")
+            >>> font.load_lettering_sheet("sheet.png")
+            >>> result = font.build("./fonts", styles=["Regular", "Bold"])
+            >>> print(result['styles']['Regular']['ttf'])
+            ./fonts/MyHandRegular.ttf
         """
         if not self.glyphs:
             raise ValueError("Cannot build font: no glyphs have been added.")
@@ -119,5 +220,20 @@ class ComicFont:
         all_caps: bool = False,
         title: str = "GraphicNovelSans Lettering Template"
     ) -> str:
-        """Generate a high-resolution printable / digital lettering sheet."""
+        """Generate a high-resolution printable or digital lettering template.
+
+        Convenience static method that delegates to `generate_lettering_sheet()`.
+
+        Args:
+            output_path: Destination file path.
+            all_caps: Generate uppercase-only layout.
+            title: Header text for the template.
+
+        Returns:
+            Absolute path to the saved template image.
+
+        Example:
+            >>> template_path = ComicFont.create_template("my_template.png")
+            >>> print(f"Print {template_path} and start lettering!")
+        """
         return generate_lettering_sheet(output_path, all_caps=all_caps, title=title)
