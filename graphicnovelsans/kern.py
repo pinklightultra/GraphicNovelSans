@@ -31,34 +31,6 @@ MAX_TIGHT: int = 200
 AREA: float = 62.0
 FLANK_FLOOR: float = 10.0
 
-This module implements a specialized kerning algorithm optimized for comic lettering:
-1. **Edge Profiling**: Slices glyphs into 40 horizontal bands to capture vertical variation.
-2. **Flank Sidebearings**: Calculates LSB/RSB based on clear space targets.
-3. **Band-Gap Kerning**: Adjusts spacing based on the narrowest gap between adjacent glyphs.
-
-Key Constants:
-    BANDS: Number of horizontal slices (higher = more precise but slower).
-    LIMIT: Minimum adjustment magnitude to apply (filters noise).
-    MAXNEG/MAXPOS: Absolute limits on kerning values.
-    TUCK: Maximum allowed overlap as a fraction of advance width.
-    MIN_TIGHT/MAX_TIGHT: Target range for closest approach (prevents collisions/holes).
-    AREA: Target clear space on each flank (sidebearing calculation).
-    FLANK_FLOOR: Minimum sidebearing to prevent negative spacing.
-"""
-from typing import Dict, List, Tuple, Any, Optional
-from dataclasses import dataclass
-
-# Kerning Algorithm Constants
-BANDS: int = 40
-LIMIT: int = 12
-MAXNEG: int = -300
-MAXPOS: int = 150
-TUCK: float = 0.50
-MIN_TIGHT: int = 52
-MAX_TIGHT: int = 200
-AREA: float = 62.0
-FLANK_FLOOR: float = 10.0
-
 
 @dataclass(frozen=True)
 class EdgeProfile:
@@ -125,11 +97,11 @@ def compute_edge_profile(
                 b = bands[i]
                 bands[i] = (x_shifted, x_shifted) if b is None else (min(b[0], x_shifted), max(b[1], x_shifted))
 
-    return {
-        "bands": bands,
-        "adv": advance,
-        "ink": sum(1 for b in bands if b is not None)
-    }
+    return EdgeProfile(
+        bands=bands,
+        adv=advance,
+        ink=sum(1 for b in bands if b is not None),
+    )
 
 
 def compute_flanks(
