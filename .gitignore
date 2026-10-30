@@ -20,3 +20,11 @@ examples/output_fonts/
 examples/artist_filled_sheet.png
 examples/lettering_template.png
 out/
+
+# Test / scratch artifacts (kept out of the repo, but example PNGs are tracked)
+test_*.png
+empty_sheet.png
+scripts/*.png
+
+# Nested repos
+lumo-tamer/
