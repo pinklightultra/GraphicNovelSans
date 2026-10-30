@@ -1,8 +1,16 @@
 """Lettering sheet template generation and automated character extraction.
 
-Enables artists to print or open a template in Procreate / Clip Studio Paint / Photoshop,
-hand-write characters into designated cells, and have the library automatically
-segment and identify each letter without manual tagging.
+This module enables a seamless workflow for comic artists:
+1. **Template Generation**: Creates a printable/digital lettering sheet with
+   light-blue guide characters that are automatically filtered during extraction.
+2. **Automated Extraction**: Parses filled sheets and maps each cell to its
+   corresponding character without manual tagging.
+
+Key Features:
+- Non-photo blue guide lines (filtered by `blue_pencil_drop` mode).
+- Registration markers for alignment.
+- Baseline and x-height indicators in each cell.
+- Support for both full alphabet and all-caps layouts.
 """
 from typing import Dict, List, Tuple, Any, Optional
 import numpy as np
@@ -11,6 +19,7 @@ from PIL import Image, ImageDraw, ImageFont
 from .ingest import load_image, extract_ink_mask
 from .segment import tighten
 
+#: Characters to include in a full alphabet template (6 rows × 13 columns).
 ESSENTIAL_CHARS = [
     # Row 1: Uppercase A-M
     "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
@@ -45,11 +54,26 @@ def generate_lettering_sheet(
     width: int = 2480,
     height: int = 3508
 ) -> str:
-    """Generate a high-resolution printable / digital lettering canvas.
+    """Generate a high-resolution printable or digital lettering template.
 
-    Guidelines and prompt letters are drawn in light non-photo cyan/blue
-    (#C6E2FF), so the ink extraction engine can cleanly drop them and keep
-    only the artist's dark ink.
+    Creates a blank canvas with light-blue guide characters, baseline markers,
+    and registration corners. The template is designed to be filled by hand
+    (paper + pen) or digitally (Procreate, Clip Studio Paint, Photoshop).
+
+    Args:
+        output_path: Destination file path (PNG recommended).
+        all_caps: If True, generate uppercase-only layout (4 rows).
+        title: Header text displayed at the top of the sheet.
+        width: Canvas width in pixels (default: 2480 ≈ A4 at 300 DPI).
+        height: Canvas height in pixels (default: 3508 ≈ A4 at 300 DPI).
+
+    Returns:
+        Absolute path to the saved image file.
+
+    Example:
+        >>> path = generate_lettering_sheet("my_sheet.png", all_caps=False)
+        >>> print(f"Template saved to {path}")
+        Template saved to /home/user/my_sheet.png
     """
     chars = ALL_CAPS_CHARS if all_caps else ESSENTIAL_CHARS
     cols = 13
@@ -126,8 +150,28 @@ def extract_from_lettering_sheet(
 ) -> Dict[str, Dict[str, Any]]:
     """Extract glyphs from a filled lettering sheet.
 
+    Automatically segments the image into individual character cells, extracts
+    the ink mask, and returns a dictionary ready for font building. Light-blue
+    guide characters are filtered out by the `ink_mode`.
+
+    Args:
+        sheet_image: Path to the filled sheet image or a PIL Image object.
+        all_caps: Must match the template layout used (True for all-caps sheets).
+        ink_mode: Extraction strategy (default: `blue_pencil_drop`).
+
     Returns:
-        Dictionary mapping character string to dict with 'mask', 'char', etc.
+        Dictionary mapping character strings to glyph data:
+        `{char: {"char": char, "mask": bool_array, "synthetic": False, ...}}`
+
+    Raises:
+        ValueError: If the image cannot be loaded or no ink is found.
+
+    Example:
+        >>> glyphs = extract_from_lettering_sheet("filled_sheet.png")
+        >>> len(glyphs)
+        52  # All letters extracted
+        >>> "A" in glyphs
+        True
     """
     img = load_image(sheet_image).convert("RGB")
     width, height = img.size
