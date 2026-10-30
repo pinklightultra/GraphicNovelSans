@@ -14,11 +14,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 52 new tests covering edge cases, error paths, and integration scenarios.
 - `EdgeProfile` dataclass for type-safe kerning calculations.
 - CLI help text with usage examples.
+- `docs/performance.md` documenting hot paths and optimization guidance.
 
 ### Changed
 - Improved `dilate_with_counter_protection` algorithm documentation.
 - Enhanced `measure_natural_slant` to handle backhand writing styles.
 - Updated `build_family` to validate style names before processing.
+- Moved developer scripts into a dedicated `scripts/` directory.
 
 ### Fixed
 - Fixed duplicate docstring block in `kern.py`.
@@ -38,4 +40,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Blue-pencil and red-channel ink extraction modes.
 - Dual-format export (TTF + WOFF2).
 - Band-gap kerning optimized for comic lettering.
->>>>>>> REPLACE
