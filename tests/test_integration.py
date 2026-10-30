@@ -21,12 +21,9 @@ def test_full_pipeline_template_to_build():
         sheet = Image.new("RGB", (2480, 3508), (255, 255, 255))
         
         # Draw some "ink" in a few cells (simulating filled template)
-        # We'll just create a simple pattern for testing
-        import numpy as np
         arr = np.array(sheet)
         
         # Draw "A" in first cell (approximate location)
-        # Cell 0,0 is at margin_x, margin_top
         margin_x, margin_top = 120, 280
         cell_w, cell_h = (2480 - 240) // 13, (3508 - 280 - 140) // 4
         
@@ -111,4 +108,3 @@ def test_all_caps_vs_mixed_layout():
         
         # Both should be same dimensions (same canvas size)
         assert caps_img.size == mixed_img.size
->>>>>>> REPLACE

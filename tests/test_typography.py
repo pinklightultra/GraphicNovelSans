@@ -65,13 +65,15 @@ def test_measure_natural_slant_vertical():
 
 def test_measure_natural_slant_forward():
     """Test slant measurement on forward-leaning stems."""
-    # Forward-leaning rectangle
-    contours = [[(0, 0), (10, 0), (20, 100), (10, 100)]]
+    # Forward-leaning rectangle with sufficient height (>300)
+    contours = [[(0, 0), (10, 0), (40, 400), (30, 400)]]
     contours_by_char = {"I": contours}
     
     slant = measure_natural_slant(contours_by_char)
     
-    assert slant > 0  # Positive = forward lean
+    # Should detect positive slant (dx/dy = 30/400 = 0.075)
+    assert slant > 0
+    assert abs(slant - 0.075) < 0.01
 
 
 def test_measure_natural_slant_empty():
