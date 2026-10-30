@@ -39,7 +39,33 @@ def build_style(
     version: str = "1.0",
     natural_slant: Optional[float] = None
 ) -> Dict[str, Any]:
-    """Compile a single font style (TTF and WOFF2) with metrics and kerning."""
+    """Compile a single font style (TTF and WOFF2) with metrics and kerning.
+
+    Args:
+        style_name: One of "Regular", "Bold", "Italic", "Bold Italic".
+        glyphs: Dictionary of character → glyph data.
+        family_name: Font family name.
+        output_dir: Destination directory.
+        designer: Author name for metadata.
+        version: Semantic version string.
+        natural_slant: Pre-measured handwriting slant (optional).
+
+    Returns:
+        Dictionary with file paths, glyph count, kern pair count, and shear applied.
+
+    Raises:
+        ValueError: If `style_name` is invalid, `glyphs` is empty, or `family_name` is empty.
+        PermissionError: If `output_dir` is not writable.
+    """
+    # Validate inputs
+    if not glyphs:
+        raise ValueError("Cannot build style: glyphs dictionary is empty.")
+    if not family_name or not family_name.strip():
+        raise ValueError("Font family name cannot be empty.")
+    if style_name not in STYLES_SPEC:
+        valid = list(STYLES_SPEC.keys())
+        raise ValueError(f"Invalid style: {style_name!r}. Valid options: {valid}")
+
     os.makedirs(output_dir, exist_ok=True)
     spec = STYLES_SPEC[style_name]
     slug = style_name.replace(" ", "")
@@ -181,9 +207,37 @@ def build_family(
     version: str = "1.0",
     styles: Optional[List[str]] = None
 ) -> Dict[str, Any]:
-    """Compile all requested styles for the font family."""
+    """Compile all requested styles for the font family.
+
+    Args:
+        glyphs: Dictionary of character → glyph data.
+        family_name: Font family name.
+        output_dir: Destination directory.
+        designer: Author name for metadata.
+        version: Semantic version string.
+        styles: List of styles to generate (default: all 4 RIBBI styles).
+
+    Returns:
+        Dictionary with family name, per-style results, and measured natural slant.
+
+    Raises:
+        ValueError: If `glyphs` is empty, `family_name` is empty, or `styles` contains invalid entries.
+        PermissionError: If `output_dir` is not writable.
+    """
+    # Validate inputs
+    if not glyphs:
+        raise ValueError("Cannot build font family: glyphs dictionary is empty.")
+    if not family_name or not family_name.strip():
+        raise ValueError("Font family name cannot be empty.")
+
     if styles is None:
         styles = ["Regular", "Bold", "Italic", "Bold Italic"]
+    
+    # Validate styles
+    valid_styles = ["Regular", "Bold", "Italic", "Bold Italic"]
+    invalid = [s for s in styles if s not in valid_styles]
+    if invalid:
+        raise ValueError(f"Invalid styles requested: {invalid}. Valid options: {valid_styles}")
 
     # Measure natural slant across Regular base
     sample_drawn = {}

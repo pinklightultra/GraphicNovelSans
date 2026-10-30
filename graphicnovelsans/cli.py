@@ -59,26 +59,58 @@ def main():
         parser.print_help()
         sys.exit(1)
 
-    if args.command == "template":
-        print(f"Generating lettering template -> {args.output}...")
-        ComicFont.create_template(args.output, all_caps=args.all_caps, title=args.title)
-        print("Done! Print or open in Procreate / Clip Studio Paint / Photoshop.")
+    try:
+        if args.command == "template":
+            print(f"Generating lettering template -> {args.output}...")
+            ComicFont.create_template(args.output, all_caps=args.all_caps, title=args.title)
+            print("Done! Print or open in Procreate / Clip Studio Paint / Photoshop.")
 
-    elif args.command == "build":
-        print(f"Loading lettering sheet from {args.input}...")
-        font = ComicFont(family_name=args.name, designer=args.designer, ink_mode=args.ink_mode)
-        count = font.load_lettering_sheet(args.input, all_caps=args.all_caps, ink_mode=args.ink_mode)
-        print(f"Extracted {count} character drawings.")
+        elif args.command == "build":
+            # Validate input file exists before proceeding
+            import os
+            if not os.path.exists(args.input):
+                print(f"Error: Input file not found: {args.input}", file=sys.stderr)
+                sys.exit(1)
 
-        synthesized = font.synthesize_missing()
-        if synthesized:
-            print(f"Auto-synthesized {len(synthesized)} missing glyphs: {', '.join(synthesized)}")
+            print(f"Loading lettering sheet from {args.input}...")
+            font = ComicFont(family_name=args.name, designer=args.designer, ink_mode=args.ink_mode)
+            
+            try:
+                count = font.load_lettering_sheet(args.input, all_caps=args.all_caps, ink_mode=args.ink_mode)
+            except ValueError as e:
+                print(f"Error extracting glyphs: {e}", file=sys.stderr)
+                sys.exit(1)
 
-        print(f"Compiling 4-style linked family into {args.out}...")
-        res = font.build(output_dir=args.out)
-        print(f"Successfully built {res['family']}!")
-        for style, sinfo in res["styles"].items():
-            print(f"  [{style}] TTF: {sinfo['ttf']} | WOFF2: {sinfo['woff2']} ({sinfo['kern_pairs']} kern pairs)")
+            if count == 0:
+                print("Error: No characters were extracted from the sheet. Check contrast and ink mode.", file=sys.stderr)
+                sys.exit(1)
+
+            print(f"Extracted {count} character drawings.")
+
+            synthesized = font.synthesize_missing()
+            if synthesized:
+                print(f"Auto-synthesized {len(synthesized)} missing glyphs: {', '.join(synthesized)}")
+
+            print(f"Compiling 4-style linked family into {args.out}...")
+            try:
+                res = font.build(output_dir=args.out)
+            except ValueError as e:
+                print(f"Error building font: {e}", file=sys.stderr)
+                sys.exit(1)
+
+            print(f"Successfully built {res['family']}!")
+            for style, sinfo in res["styles"].items():
+                print(f"  [{style}] TTF: {sinfo['ttf']} | WOFF2: {sinfo['woff2']} ({sinfo['kern_pairs']} kern pairs)")
+
+    except FileNotFoundError as e:
+        print(f"Error: File not found - {e}", file=sys.stderr)
+        sys.exit(1)
+    except PermissionError as e:
+        print(f"Error: Permission denied - {e}", file=sys.stderr)
+        sys.exit(1)
+    except Exception as e:
+        print(f"Unexpected error: {e}", file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

@@ -81,13 +81,24 @@ class ComicFont:
             ink_mode: Override the default ink extraction mode for this glyph.
 
         Raises:
-            ValueError: If no ink is detected in the provided image.
+            ValueError: If `char` is empty, multiple characters, or no ink is detected.
             FileNotFoundError: If `image_or_mask` is a non-existent path.
+            TypeError: If `image_or_mask` is of an unsupported type.
 
         Example:
             >>> font.add_glyph("A", "letter_A.png")
             >>> font.add_glyph("!", mask_array)
         """
+        # Validate character input
+        if not char or len(char) > 1:
+            raise ValueError(f"Invalid character: {char!r}. Expected a single character string.")
+
+        # Validate ink_mode if overridden
+        if ink_mode is not None:
+            valid_modes = ["auto", "black_on_white", "alpha", "blue_pencil_drop", "red_channel", "white_on_black"]
+            if ink_mode not in valid_modes:
+                raise ValueError(f"Invalid ink_mode: {ink_mode!r}. Valid options: {valid_modes}")
+
         mode = ink_mode or self.ink_mode
         if isinstance(image_or_mask, np.ndarray) and image_or_mask.dtype == bool:
             mask = image_or_mask
@@ -96,7 +107,7 @@ class ComicFont:
 
         tight_mask = tighten(mask)
         if not tight_mask.any():
-            raise ValueError(f"No ink found for character {char!r}")
+            raise ValueError(f"No ink found for character {char!r}. Check contrast and ink mode.")
 
         self.glyphs[char] = {
             "char": char,
@@ -125,7 +136,8 @@ class ComicFont:
             Number of characters successfully extracted.
 
         Raises:
-            ValueError: If no characters are found in the sheet.
+            ValueError: If no characters are found in the sheet, or if `ink_mode` is invalid.
+            FileNotFoundError: If `sheet_path` does not exist.
 
         Example:
             >>> font = ComicFont()
@@ -133,7 +145,18 @@ class ComicFont:
             >>> print(f"Extracted {count} glyphs")
             Extracted 52
         """
+        # Validate ink_mode
+        valid_modes = ["auto", "black_on_white", "alpha", "blue_pencil_drop", "red_channel"]
+        if ink_mode not in valid_modes:
+            raise ValueError(f"Invalid ink_mode: {ink_mode!r}. Valid options: {valid_modes}")
+
         extracted = extract_from_lettering_sheet(sheet_path, all_caps=all_caps, ink_mode=ink_mode)
+        
+        if not extracted:
+            raise ValueError("No characters were extracted from the sheet. "
+                           "Check that the image has high contrast, the ink mode is correct, "
+                           "and characters are drawn within the guide boxes.")
+        
         self.glyphs.update(extracted)
         return len(extracted)
 
@@ -190,7 +213,8 @@ class ComicFont:
             - `natural_slant_degrees`: Measured handwriting slant.
 
         Raises:
-            ValueError: If no glyphs have been added.
+            ValueError: If no glyphs have been added, or if an invalid style is requested.
+            PermissionError: If the output directory is not writable.
 
         Example:
             >>> font = ComicFont("My Hand", "Alice")
@@ -200,7 +224,15 @@ class ComicFont:
             ./fonts/MyHandRegular.ttf
         """
         if not self.glyphs:
-            raise ValueError("Cannot build font: no glyphs have been added.")
+            raise ValueError("Cannot build font: no glyphs have been added. "
+                           "Call load_lettering_sheet() or add_glyph() first.")
+
+        # Validate styles
+        valid_styles = ["Regular", "Bold", "Italic", "Bold Italic"]
+        if styles is not None:
+            invalid = [s for s in styles if s not in valid_styles]
+            if invalid:
+                raise ValueError(f"Invalid styles: {invalid}. Valid options: {valid_styles}")
 
         if auto_synthesize:
             self.synthesize_missing()

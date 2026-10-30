@@ -74,7 +74,21 @@ def extract_ink_mask(
 
     Returns:
         2D boolean numpy array of shape (height, width).
+
+    Raises:
+        ValueError: If `mode` is not one of the supported options.
+        FileNotFoundError: If `image` is a non-existent path.
+        TypeError: If `image` is of an unsupported type.
     """
+    # Validate mode
+    valid_modes = ["auto", "black_on_white", "alpha", "blue_pencil_drop", "red_channel", "white_on_black"]
+    if mode not in valid_modes:
+        raise ValueError(f"Invalid ink extraction mode: {mode!r}. Valid options: {valid_modes}")
+
+    # Validate threshold if provided
+    if threshold is not None and not (0 <= threshold <= 255):
+        raise ValueError(f"Threshold must be between 0 and 255, got {threshold}")
+
     img = load_image(image)
 
     # Auto mode resolution
