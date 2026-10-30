@@ -82,7 +82,7 @@ def build_style(
 
     for ch, (cs, px) in sorted(drawn.items()):
         raw = compute_edge_profile(cs, 0, DESCENDER, ASCENDER)
-        lsb, rsb = compute_flanks(raw["bands"], DESCENDER, ASCENDER, (0, X_HEIGHT))
+        lsb, rsb = compute_flanks(raw.bands, DESCENDER, ASCENDER, (0, X_HEIGHT))
         xs = [p[0] for c in cs for p in c] or [0.0]
         x0, x1 = min(xs), max(xs)
         adv = int(round(lsb + (x1 - x0) + rsb))

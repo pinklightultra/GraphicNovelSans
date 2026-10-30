@@ -19,22 +19,13 @@ import numpy as np
 UPSCALE: int = 4  #: Supersampling factor prior to tracing to reduce aliasing artifacts.
 
 
-@dataclass(frozen=True)
-class ContourPoint:
-    """A single point in a contour path."""
-    x: float
-    y: float
-
-    def __iter__(self):
-        yield self.x
-        yield self.y
-
-
+# Type aliases for clarity (using tuple internally for compatibility)
+ContourPoint = Tuple[float, float]
 Contour = List[ContourPoint]
 Contours = List[Contour]
 
 
-def _rdp(pts: List[ContourPoint], eps: float) -> List[ContourPoint]:
+def _rdp(pts: Contour, eps: float) -> Contour:
     """Simplify a polygon using the Ramer-Douglas-Peucker algorithm.
 
     Preserves significant geometric features while removing redundant vertices.
@@ -42,7 +33,7 @@ def _rdp(pts: List[ContourPoint], eps: float) -> List[ContourPoint]:
     the essential shape of hand-drawn letters.
 
     Args:
-        pts: Ordered list of contour points.
+        pts: Ordered list of (x, y) contour points.
         eps: Simplification tolerance. Points farther than this distance from
              the simplified line segment are kept.
 
@@ -50,9 +41,9 @@ def _rdp(pts: List[ContourPoint], eps: float) -> List[ContourPoint]:
         A simplified list of contour points. The first and last points are always preserved.
 
     Example:
-        >>> pts = [ContourPoint(0,0), ContourPoint(1,1), ContourPoint(2,0)]
+        >>> pts = [(0.0, 0.0), (1.0, 1.0), (2.0, 0.0)]
         >>> _rdp(pts, eps=0.5)
-        [ContourPoint(x=0.0, y=0.0), ContourPoint(x=2.0, y=0.0)]
+        [(0.0, 0.0), (2.0, 0.0)]
     """
     if len(pts) < 3:
         return pts

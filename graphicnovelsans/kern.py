@@ -215,17 +215,17 @@ def compute_kern_pairs(
         for b in names:
             pb = profiles[b]
             gap = None
-            for ba, bb in zip(pa["bands"], pb["bands"]):
+            for ba, bb in zip(pa.bands, pb.bands):
                 if ba is None or bb is None:
                     continue
-                g = (pa["adv"] - ba[1]) + bb[0]
+                g = (pa.adv - ba[1]) + bb[0]
                 gap = g if gap is None else min(gap, g)
 
             if gap is None:
                 continue
 
-            shared = sum(1 for ba, bb in zip(pa["bands"], pb["bands"]) if ba is not None and bb is not None)
-            tall = max(pa["ink"], pb["ink"])
+            shared = sum(1 for ba, bb in zip(pa.bands, pb.bands) if ba is not None and bb is not None)
+            tall = max(pa.ink, pb.ink)
             gaps[(a, b)] = (gap, shared / float(tall) if tall else 0.0)
 
     kerns = {}
@@ -239,7 +239,7 @@ def compute_kern_pairs(
         else:
             continue
 
-        v = int(round(max(v, -TUCK * profiles[a]["adv"])))
+        v = int(round(max(v, -TUCK * profiles[a].adv)))
         if abs(v) < limit:
             continue
 
