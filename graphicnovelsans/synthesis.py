@@ -1,4 +1,21 @@
-"""Automatic synthesis of missing glyphs from available hand-drawn characters."""
+"""Automatic synthesis of missing glyphs from available hand-drawn characters.
+
+This module implements heuristic rules for generating missing characters from
+existing ones. It is designed to handle common omissions in hand-lettered sheets:
+
+Rules Implemented:
+    1. **Mirror**: `)` from `(`, `q` from `p` (horizontal flip).
+    2. **Case Copy**: Lowercase from uppercase (and vice versa) for symmetric shapes
+       (z/Z, x/X, c/C, o/O, v/V, w/W, s/S).
+    3. **Pair Construction**: `"` from `'` (duplicate with gap).
+    4. **Stacking**: `;` from `.` + `,`, `:` from `.` + `.`.
+    5. **Dot Addition**: Dotted `j` from undotted `j` + `.`.
+    6. **Fallback**: Generates a simple bar for `-` if missing.
+
+Note:
+    Synthesized glyphs are marked with `"synthetic": True` and an `"origin"` field
+    describing the source transformation.
+"""
 from typing import Dict, Any
 import numpy as np
 
@@ -6,9 +23,27 @@ import numpy as np
 def synthesize_missing_glyphs(glyphs: Dict[str, Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
     """Synthesize missing characters using available hand-lettered glyphs.
 
-    Comic artists often omit rare letters (e.g. 'q', 'z') or punctuation
-    (';', '"', ')'). This module automatically fills in the gaps using
-    geometric and typographic combination rules.
+    Applies a series of geometric and typographic rules to fill gaps in the
+    provided glyph set. The order of operations matters: mirroring happens first,
+    then case copying, then punctuation construction.
+
+    Args:
+        glyphs: Dictionary mapping character strings to glyph data dicts.
+                Each glyph must have a `"mask"` key (boolean numpy array).
+
+    Returns:
+        A new dictionary containing the original glyphs plus any synthesized ones.
+        Synthesized glyphs include `"synthetic": True` and `"origin"` fields.
+
+    Example:
+        >>> glyphs = {"(": mask_paren, "p": mask_p}
+        >>> result = synthesize_missing_glyphs(glyphs)
+        >>> ")" in result  # Generated from '('
+        True
+        >>> "q" in result  # Generated from 'p'
+        True
+        >>> result[")"]["origin"]
+        'mirror from ('
     """
     out = dict(glyphs)
 

@@ -1,15 +1,77 @@
-"""Automated 40-band edge profiling, flank sidebearings, and band-gap kerning engine."""
-from typing import Dict, List, Tuple, Any, Optional
+"""Automated 40-band edge profiling, flank sidebearings, and band-gap kerning engine.
 
-BANDS = 40        # Horizontal slices from descender to ascender
-LIMIT = 12        # Drop minor adjustments smaller than this
-MAXNEG = -300     # Maximum tuck
-MAXPOS = 150      # Maximum push apart
-TUCK = 0.50       # Never tuck past 50% of preceding glyph advance
-MIN_TIGHT = 52    # Closest ink may come before collision
-MAX_TIGHT = 200   # Widest closest approach before it reads as a visual hole
-AREA = 62         # Target average clear space on each flank
-FLANK_FLOOR = 10  # Minimum sidebearing floor
+This module implements a specialized kerning algorithm optimized for comic lettering:
+1. **Edge Profiling**: Slices glyphs into 40 horizontal bands to capture vertical variation.
+2. **Flank Sidebearings**: Calculates LSB/RSB based on clear space targets.
+3. **Band-Gap Kerning**: Adjusts spacing based on the narrowest gap between adjacent glyphs.
+
+Key Constants:
+    BANDS: Number of horizontal slices (higher = more precise but slower).
+    LIMIT: Minimum adjustment magnitude to apply (filters noise).
+    MAXNEG/MAXPOS: Absolute limits on kerning values.
+    TUCK: Maximum allowed overlap as a fraction of advance width.
+    MIN_TIGHT/MAX_TIGHT: Target range for closest approach (prevents collisions/holes).
+    AREA: Target clear space on each flank (sidebearing calculation).
+    FLANK_FLOOR: Minimum sidebearing to prevent negative spacing.
+"""
+from typing import Dict, List, Tuple, Any, Optional
+from dataclasses import dataclass
+
+# Import typography constants used in default arguments
+from .typography import DESCENDER, ASCENDER, X_HEIGHT
+
+# Kerning Algorithm Constants
+BANDS: int = 40
+LIMIT: int = 12
+MAXNEG: int = -300
+MAXPOS: int = 150
+TUCK: float = 0.50
+MIN_TIGHT: int = 52
+MAX_TIGHT: int = 200
+AREA: float = 62.0
+FLANK_FLOOR: float = 10.0
+
+This module implements a specialized kerning algorithm optimized for comic lettering:
+1. **Edge Profiling**: Slices glyphs into 40 horizontal bands to capture vertical variation.
+2. **Flank Sidebearings**: Calculates LSB/RSB based on clear space targets.
+3. **Band-Gap Kerning**: Adjusts spacing based on the narrowest gap between adjacent glyphs.
+
+Key Constants:
+    BANDS: Number of horizontal slices (higher = more precise but slower).
+    LIMIT: Minimum adjustment magnitude to apply (filters noise).
+    MAXNEG/MAXPOS: Absolute limits on kerning values.
+    TUCK: Maximum allowed overlap as a fraction of advance width.
+    MIN_TIGHT/MAX_TIGHT: Target range for closest approach (prevents collisions/holes).
+    AREA: Target clear space on each flank (sidebearing calculation).
+    FLANK_FLOOR: Minimum sidebearing to prevent negative spacing.
+"""
+from typing import Dict, List, Tuple, Any, Optional
+from dataclasses import dataclass
+
+# Kerning Algorithm Constants
+BANDS: int = 40
+LIMIT: int = 12
+MAXNEG: int = -300
+MAXPOS: int = 150
+TUCK: float = 0.50
+MIN_TIGHT: int = 52
+MAX_TIGHT: int = 200
+AREA: float = 62.0
+FLANK_FLOOR: float = 10.0
+
+
+@dataclass(frozen=True)
+class EdgeProfile:
+    """Edge profile data for a single glyph.
+
+    Attributes:
+        bands: List of (leftmost_x, rightmost_x) tuples for each band. None if no ink in band.
+        adv: Advance width of the glyph.
+        ink: Total number of ink pixels (approximate).
+    """
+    bands: List[Tuple[float, float]]
+    adv: float
+    ink: int
 
 
 def _densify_contour(contour: List[Tuple[float, float]], step: float = 12.0) -> List[Tuple[float, float]]:
@@ -28,11 +90,30 @@ def _densify_contour(contour: List[Tuple[float, float]], step: float = 12.0) -> 
 def compute_edge_profile(
     contours: List[List[Tuple[float, float]]],
     advance: float,
-    descender: float = -220,
-    ascender: float = 800,
+    descender: float = DESCENDER,
+    ascender: float = ASCENDER,
     shift: float = 0.0
-) -> Dict[str, Any]:
-    """Slice glyph into 40 horizontal bands and record leftmost and rightmost ink."""
+) -> EdgeProfile:
+    """Slice a glyph into horizontal bands and record edge positions.
+
+    Creates a 40-band profile from the descender to the ascender, capturing
+    the leftmost and rightmost ink position in each band. This profile is
+    used for both sidebearing calculation and kerning pair analysis.
+
+    Args:
+        contours: List of glyph contours in font coordinates.
+        advance: Glyph advance width.
+        descender: Baseline offset for the bottom of the band system (default: -220).
+        ascender: Baseline offset for the top of the band system (default: 800).
+        shift: Horizontal shift to apply to all points (for kerning calculations).
+
+    Returns:
+        EdgeProfile containing the band data, advance, and ink count.
+
+    Note:
+        Bands are indexed 0 (bottom) to 39 (top). A band value of None indicates
+        no ink intersects that horizontal slice.
+    """
     bands = [None] * BANDS
     span = (ascender - descender) / float(BANDS)
 
@@ -53,13 +134,33 @@ def compute_edge_profile(
 
 def compute_flanks(
     bands: List[Optional[Tuple[float, float]]],
-    descender: float = -220,
-    ascender: float = 800,
-    zone: Tuple[float, float] = (0, 437),
+    descender: float = DESCENDER,
+    ascender: float = ASCENDER,
+    zone: Tuple[float, float] = (0, X_HEIGHT),
     target_area: float = AREA,
     floor: float = FLANK_FLOOR
 ) -> Tuple[float, float]:
-    """Derive Left and Right Sidebearings (LSB, RSB) from glyph silhouette."""
+    """Calculate Left and Right Sidebearings from an edge profile.
+
+    Determines the optimal spacing around a glyph by analyzing the clear space
+    on its left and right flanks within the x-height zone. The algorithm aims
+    for a target clear space (`AREA`) while respecting a minimum floor.
+
+    Args:
+        bands: Edge profile bands from `compute_edge_profile`.
+        descender: Bottom of the band system.
+        ascender: Top of the band system.
+        zone: (y_min, y_max) range to analyze for sidebearings (default: x-height zone).
+        target_area: Desired clear space on each flank.
+        floor: Minimum allowed sidebearing value.
+
+    Returns:
+        Tuple of (LSB, RSB) in font units.
+
+    Note:
+        If no ink is found in the specified zone, the function falls back to
+        analyzing the entire glyph height.
+    """
     span = (ascender - descender) / float(len(bands))
     zl, zh = zone
     idx = [
@@ -84,10 +185,28 @@ def compute_flanks(
 
 
 def compute_kern_pairs(
-    profiles: Dict[str, Dict[str, Any]],
+    profiles: Dict[str, EdgeProfile],
     limit: int = LIMIT
 ) -> Dict[Tuple[str, str], int]:
-    """Calculate kerning adjustments across all ordered pairs from closest band approach."""
+    """Calculate optimal kerning adjustments for all glyph pairs.
+
+    Analyzes the closest approach between every ordered pair of glyphs in the
+    provided profiles. Adjustments are made to:
+    - Prevent collisions (gap < MIN_TIGHT)
+    - Reduce visual holes (gap > MAX_TIGHT)
+
+    Args:
+        profiles: Dictionary mapping glyph names to their EdgeProfiles.
+        limit: Minimum adjustment magnitude to include in the result.
+
+    Returns:
+        Dictionary mapping (glyph_a, glyph_b) tuples to adjustment values (font units).
+        Positive values push glyphs apart; negative values allow overlap (tuck).
+
+    Note:
+        Adjustments are clamped to [MAXNEG, MAXPOS] and filtered by `limit`.
+        Tucking is limited to TUCK * advance_width of the leading glyph.
+    """
     gaps = {}
     names = sorted(profiles)
 
