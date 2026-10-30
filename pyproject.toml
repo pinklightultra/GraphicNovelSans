@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "graphicnovelsans"
-version = "1.0.0"
+version = "1.1.0"
 description = "A font creation library for comic artists to turn hand-lettered drawings into 4-style TrueType/WOFF2 font families."
 readme = "README.md"
 requires-python = ">=3.8"

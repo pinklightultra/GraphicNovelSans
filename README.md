@@ -78,3 +78,12 @@ We welcome contributions! See `docs/contributing.md` for guidelines.
 MIT License – see `LICENSE` for details.
 
 Made with ❤️ by Justin Severn and the community.
+
+## 📢 Latest Changes (v1.1.0)
+
+- **Enhanced Documentation**: Every function now has detailed docstrings with examples.
+- **Robust Error Handling**: Clear error messages and graceful failures.
+- **Expanded Test Suite**: 58 tests covering all modules and edge cases.
+- **Type Safety**: Full type hints for better IDE support and refactoring.
+
+See [CHANGELOG.md](CHANGELOG.md) for full details.
