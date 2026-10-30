@@ -1,0 +1,88 @@
+site_name: GraphicNovelSans Docs
+site_description: Turn handwriting into professional comic fonts.
+site_url: https://pinklightultra.github.io/graphicnovelsans
+repo_url: https://github.com/pinklightultra/graphicnovelsans
+repo_name: GitHub
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  font:
+    text: Roboto
+    code: Roboto Mono
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+  icon:
+    repo: fontawesome/brands/github
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/pinklightultra/graphicnovelsans
+  domain: graphicnovelsans.com  # Change this to your Plausible domain
+  generator: false
+  consent:
+    title: Privacy
+    description: We use anonymous analytics. No cookies.
+    actions:
+      - accept
+      - reject
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: installation.md
+    - Quickstart: quickstart.md
+    - CLI Reference: cli-guide.md
+    - Troubleshooting: troubleshooting.md
+  - API Reference:
+    - Overview: api/index.md
+    - Core: api/core.md
+    - Ingest: api/ingest.md
+    - Synthesis: api/synthesis.md
+    - Builder: api/builder.md
+    - Kern: api/kern.md
+    - Segment: api/segment.md
+    - Transform: api/transform.md
+    - Typography: api/typography.md
+    - Trace: api/trace.md
+    - Template: api/template.md
+  - Community:
+    - Contributing: contributing.md
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - admonition
+  - pymdownx.details
+  - toc:
+      permalink: true
+
+extra_javascript:
+  - https://plausible.io/js/script.js
