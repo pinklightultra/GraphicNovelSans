@@ -68,6 +68,7 @@ nav:
     - Template: api/template.md
   - Community:
     - Contributing: contributing.md
+    - Performance Notes: performance.md
 
 markdown_extensions:
   - pymdownx.highlight:
