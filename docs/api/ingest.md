@@ -22,7 +22,7 @@ Extracts a boolean mask where `True` indicates ink.
     - `black_on_white`: Standard dark ink on light paper.
     - `alpha`: Uses alpha channel for digital inks.
     - `blue_pencil_drop`: Filters non-photo blue sketch lines.
-    - `red_channel`: Isolates red-channel ink (BLUE175 style).
+    - `red_channel`: Light-blue or cyan ink, taken from the red channel.
     - `white_on_black`: Light ink on dark background.
   - `threshold`: Optional custom threshold (0–255).
   - `invert`: If `True`, inverts the mask.

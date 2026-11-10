@@ -26,8 +26,8 @@ class ComicFont:
     """High-level orchestrator for comic font generation.
 
     This is the main public API. It allows artists to transform hand-drawn
-    lettering into a professional 4-style font family (Regular, Bold, Italic,
-    Bold Italic) with automatic kerning and glyph synthesis.
+    lettering into a four-style font family (Regular, Bold, Italic,
+    Bold Italic) with kerning and glyph synthesis.
 
     Attributes:
         family_name: Font family name (used in metadata and filenames).

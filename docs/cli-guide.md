@@ -1,12 +1,12 @@
 # CLI Reference
 
-The `graphicnovelsans` command-line interface offers two primary subcommands: `template` and `build`.
+The `graphicnovelsans` command has two subcommands, `template` and `build`. It builds a new family from a sheet. It does not rebuild the BLUE175 Hand files in `blue175-hand/fonts/`.
 
-## Global Options
-Exit codes:
-- `0`: Success
-- `1`: General error (e.g., missing file)
-- `2`: Invalid arguments
+## Exit codes
+
+- `0`: the command finished.
+- `1`: the program reported an error, including a missing input file, a sheet with no characters, or no subcommand.
+- `2`: argparse rejected the arguments.
 
 ---
 
@@ -63,25 +63,21 @@ graphicnovelsans build INPUT [-h] [-n NAME] [-d DESIGNER] [-o OUT] [--all-caps] 
 | `auto` | Auto-detect transparency or black-on-white |
 | `black_on_white` | Dark ink on white paper |
 | `alpha` | Digital layers with transparency |
-| `blue_pencil_drop` | Blue pencil sketches (default) |
-| `red_channel` | Red-channel isolation (BLUE175 style) |
+| `blue_pencil_drop` | Dark ink over non-photo blue (default) |
+| `red_channel` | Light-blue ink, separated on the red channel |
+
+Spaces are removed from the family name. Regular has no style suffix; the other files use a hyphen and the style with the space removed. `My Comic Hand` is written as `MyComicHand.ttf`, `MyComicHand-Bold.ttf`, `MyComicHand-Italic.ttf`, and `MyComicHand-BoldItalic.ttf`, plus a `.woff2` for each.
 
 ### Example
 
 ```bash
-graphicnovelsans build filled_sheet.png -n "Blue175 Hand" -d "Justin" --ink-mode red_channel
+graphicnovelsans build filled_sheet.png -n "My Comic Hand" -d "Your Name" --ink-mode black_on_white
 ```
-
-### Exit Codes
-
-- `0`: Success
-- `1`: General error (missing file, invalid args)
-- `2`: Invalid arguments
 
 ---
 
 ## Tips
 
-- Ensure characters don't touch template borders.
-- Use high-contrast, dark strokes for best results.
-- Missing glyphs like `q` are auto-generated from `p`; draw at least one of each pair.
+- Keep strokes off the cell borders. A mark on the border is measured as part of the glyph.
+- Draw dark strokes. The default ink mode, `blue_pencil_drop`, keeps dark ink and drops non-photo blue.
+- Empty cells are filled only in the cases listed in the [quickstart](quickstart.md). A missing `q` is mirrored from `p`, and a missing `p` is mirrored from `q`.

@@ -7,11 +7,11 @@ Please be respectful and constructive. We aim for an inclusive environment for a
 
 ## Getting Started
 1. **Fork** the repository.
-2. **Clone** your fork:
+2. **Clone** the repository. If you are sending a change, fork it first and clone that fork.
 
 ```bash
-git clone https://github.com/yourusername/graphicnovelsans.git
-cd graphicnovelsans
+git clone https://github.com/pinklightultra/GraphicNovelSans.git
+cd GraphicNovelSans
 ```
 
 3. **Create a branch**:

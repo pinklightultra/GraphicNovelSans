@@ -22,7 +22,8 @@ installed them may list the name but draw a substitute face; restart it.
 drawn.
 
 `fonts/woff2/` holds the same fonts for the web. Declare all four under one family,
-so the browser uses the real bold and italic instead of faking them:
+so the browser uses the real bold and italic instead of faking them. The `url()`
+paths are relative to `fonts/`:
 
 ```css
 @font-face { font-family: "BLUE175 Hand"; src: url("woff2/BLUE175.woff2") format("woff2");

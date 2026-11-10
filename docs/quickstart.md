@@ -1,42 +1,61 @@
-# Quickstart: Create Your First Comic Font
+# Quickstart
 
-Welcome to GraphicNovelSans! In this guide, you will go from a blank screen to installing your very own custom comic font in under 5 minutes.
+This builds a new font family from a lettering sheet. It does not rebuild the BLUE175 Hand files that ship in `blue175-hand/fonts/`. Those were cut by `blue175-hand/pipeline/build.py`.
 
 ## Prerequisites
-- Python 3.8 or higher installed.
-- An image editor (optional, for digital drawing) or paper + pen.
 
-## Step 1: Generate Your Lettering Sheet
-First, we need a template to draw your characters on. This ensures consistent sizing and spacing.
+- Python 3.8 or newer, and `graphicnovelsans` installed from this repository. See [Installation](installation.md).
+- A pen, or an image editor.
 
-Run this command in your terminal:
+## Step 1: Generate a lettering sheet
 
 ```bash
 graphicnovelsans template --output lettering_template.png
 ```
 
-This generates a high-resolution PNG with light-blue guide boxes. Draw your characters neatly inside each box using a dark pen or digital brush. If using blue pencils, keep the guide lines light so they're easy to filter out later.
+The file is a 2480×3508 PNG (A4 at 300 DPI) with light-blue guide characters, a cell grid, and a baseline and an x-height line in each cell. Draw with dark ink. `--ink-mode blue_pencil_drop`, the `build` default, keeps dark strokes and drops non-photo blue.
 
-## Step 2: Fill Out the Template
+`--all-caps` writes an uppercase-only sheet.
 
-Draw all 26 letters (A–Z), numbers (0–9), and common punctuation. You can skip `q`, `p`, `)`, etc.—they'll be auto-generated from their counterparts. Save your finished sheet as `filled_sheet.png` (300 DPI recommended).
+## Step 2: Fill in the cells
 
-## Step 3: Build Your Font
+The full sheet has a cell for `A-Z`, `a-z`, `0-9`, and `. , : ; ' " ( ) - ! ? $`. There is no space cell. `build` adds a space glyph itself.
+
+You can leave a cell empty when another character can stand in:
+
+- `q` if you drew `p`, or `p` if you drew `q`
+- `)` if you drew `(`
+- `"` if you drew `'`
+- `;` if you drew `.` and `,`
+- `:` if you drew `.`
+- the other case of `c`, `o`, `s`, `v`, `w`, `x`, or `z`
+
+A blank `-` is filled with a plain bar. Any other empty cell is missing from the font.
+
+Save the sheet as a PNG, JPG, or WebP.
+
+## Step 3: Build the family
 
 ```bash
 graphicnovelsans build filled_sheet.png -n "My Comic Hand" -d "Your Name"
 ```
 
-Defaults: ink mode `blue_pencil_drop`, auto-synthesis enabled, output to `./dist/` with 4 styles.
+The default ink mode is `blue_pencil_drop`. Fonts are written to `./dist/`. Spaces are removed from the family name, and Regular has no style suffix:
 
-## Step 4: Install & Test Your Font
+```text
+MyComicHand.ttf
+MyComicHand-Bold.ttf
+MyComicHand-Italic.ttf
+MyComicHand-BoldItalic.ttf
+```
 
-On macOS/Linux, copy the `.ttf` files to `~/Library/Fonts/` (macOS) or `~/.local/share/fonts/` (Linux), then refresh the font cache. On Windows, right-click each `.ttf` and choose "Install".
+Each style is also written as `.woff2`.
 
-## Next Steps
+## Step 4: Install the fonts you just built
 
-- Customize ink extraction with `--ink-mode`.
-- Dive into the CLI Reference for advanced options.
-- Explore the API to integrate into your own tools.
+On macOS, copy the `.ttf` files into `~/Library/Fonts/`. On Linux, copy them into `~/.local/share/fonts/` and run `fc-cache -f`. On Windows, select the files, right-click, and choose Install. Restart any application that was already open.
 
-Enjoy your custom comic font! 🎉
+## Next
+
+- Ink modes are listed in the [CLI reference](cli-guide.md).
+- The library API is in the [API reference](api/index.md).

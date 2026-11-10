@@ -20,6 +20,7 @@ examples/output_fonts/
 examples/artist_filled_sheet.png
 examples/lettering_template.png
 out/
+site/
 
 # Test / scratch artifacts (kept out of the repo, but example PNGs are tracked)
 test_*.png

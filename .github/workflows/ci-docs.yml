@@ -23,14 +23,10 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          python-version: '3.12'
 
       - name: Install dependencies
-        run: |
-          pip install mkdocs-material mkdocs-git-revision-date-localized-plugin
-
-      - name: Validate config
-        run: mkdocs config
+        run: python -m pip install mkdocs-material
 
       - name: Build site
         run: mkdocs build --strict

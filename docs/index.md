@@ -1,21 +1,14 @@
-# Welcome to GraphicNovelSans Docs
+# GraphicNovelSans
 
-**Turn your handwriting into a professional comic font family in minutes.**
+BLUE175 Hand is a four-style handwriting font traced from the comic *BLUE175*. GraphicNovelSans is the Python library that builds a TrueType and WOFF2 family from a hand-lettered sheet.
 
-GraphicNovelSans is a powerful, open-source tool designed for comic artists, illustrators, and letterers. It transforms hand-drawn character sheets into fully functional, multi-style TrueType and WOFF2 font families with intelligent kerning and automatic glyph synthesis.
+The desktop fonts are `blue175-hand/fonts/ttf/BLUE175.ttf` and the Bold, Italic, and Bold Italic files next to it. The family name is BLUE175 Hand. The font has 75 characters: `A-Z`, `a-z`, `0-9`, space, and `. , ; : - ? ! ' " ( ) $`. The specimen is `blue175-hand/fonts/specimen.png`. Install steps and the web fonts are in the [repository README](https://github.com/pinklightultra/GraphicNovelSans/blob/main/README.md).
 
-## Quick Links
+## In these docs
 
-- 🚀 **[Get Started](quickstart.md)** — Create your first font in 5 minutes.
-- 🛠️ **[CLI Reference](cli-guide.md)** — Detailed command options.
-- 💻 **[API Docs](api/index.md)** — Integrate the library into your own tools.
-- 🐞 **[Troubleshooting](troubleshooting.md)** — Common issues and fixes.
-
-## Why GraphicNovelSans?
-
-- **🖌️ Smart Ink Extraction**: Automatically isolates black ink from blue pencil sketches.
-- **✨ Auto-Synthesis**: Missing 'q'? No 'z'? We generate them from existing letters.
-- **📐 4-Style Families**: Regular, Bold, Italic, and Bold Italic with calibrated slants.
-- **🔒 Local Processing**: All image processing happens on your machine.
-
-## Installation
+- [Installation](installation.md)
+- [Quickstart](quickstart.md)
+- [CLI reference](cli-guide.md)
+- [API reference](api/index.md)
+- [Troubleshooting](troubleshooting.md)
+- [Contributing](contributing.md)
