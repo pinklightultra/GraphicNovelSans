@@ -23,8 +23,13 @@ Generates all requested styles in one pass.
 - **Parameters**: Same as `build_style`, plus `styles` (list of style names).
 - **Returns**: Dictionary with family name, per-style results, and measured natural slant.
 
-**Output Files**:
-Each style produces:
-- `{FamilyName}{Style}.ttf`
-- `{FamilyName}{Style}.woff2`
-- Temporary `.fea` file (deleted after compilation)
+**Output files.** Spaces are stripped from the family name. Regular has no style suffix. The other styles add a hyphen and the style name with the space removed.
+
+For the family name `My Comic Hand`:
+
+- `MyComicHand.ttf` and `MyComicHand.woff2`
+- `MyComicHand-Bold.ttf` and `MyComicHand-Bold.woff2`
+- `MyComicHand-Italic.ttf` and `MyComicHand-Italic.woff2`
+- `MyComicHand-BoldItalic.ttf` and `MyComicHand-BoldItalic.woff2`
+
+A `kern-<Style>.fea` file is written in the output directory while the GPOS features are built, then deleted.

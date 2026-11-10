@@ -1,38 +1,34 @@
 # Installation
 
-## Requirements
-- Python 3.8 or higher
-- pip (Python package installer)
+## BLUE175 Hand
 
-## Standard Installation
+The font in this repository is BLUE175 Hand: Regular, Bold, Italic, and Bold Italic, in `blue175-hand/fonts/ttf/`. Install all four. The family name, the web fonts, the specimen, and the character coverage are in the [repository README](https://github.com/pinklightultra/GraphicNovelSans/blob/main/README.md).
 
-```bash
-pip install graphicnovelsans
-```
+Those files are not produced by the `graphicnovelsans` command. The pipeline that cut them is in `blue175-hand/`.
 
-## Development Installation
+## The library
+
+`graphicnovelsans` is not published on PyPI. Install it from a clone. Python 3.8 or newer:
 
 ```bash
-git clone https://github.com/yourusername/graphicnovelsans.git
-cd graphicnovelsans
-pip install -e ".[test]"
+git clone https://github.com/pinklightultra/GraphicNovelSans.git
+cd GraphicNovelSans
+python -m pip install -e .
 ```
 
-## Verify Installation
+To run the tests:
+
+```bash
+python -m pip install -e ".[test]"
+pytest
+```
+
+Check the command:
 
 ```bash
 graphicnovelsans --help
 ```
 
-You should see the `template` and `build` subcommands.
+The help lists the `template` and `build` subcommands.
 
-## Optional Dependencies
-
-- ImageMagick (optional): advanced image preprocessing on some platforms.
-- Node.js (optional): only needed for the example web demo.
-
-## Uninstallation
-
-```bash
-pip uninstall graphicnovelsans
-```
+Remove the package with `python -m pip uninstall graphicnovelsans`.

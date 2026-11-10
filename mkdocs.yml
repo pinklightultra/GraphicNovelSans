@@ -1,7 +1,7 @@
 site_name: GraphicNovelSans Docs
-site_description: Turn handwriting into professional comic fonts.
+site_description: BLUE175 Hand, a four-style handwriting font, and the Python library that builds TTF and WOFF2 families from a lettering sheet.
 site_url: https://pinklightultra.github.io/graphicnovelsans
-repo_url: https://github.com/pinklightultra/graphicnovelsans
+repo_url: https://github.com/pinklightultra/GraphicNovelSans
 repo_name: GitHub
 
 theme:
@@ -37,15 +37,8 @@ theme:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/pinklightultra/graphicnovelsans
-  domain: graphicnovelsans.com  # Change this to your Plausible domain
+      link: https://github.com/pinklightultra/GraphicNovelSans
   generator: false
-  consent:
-    title: Privacy
-    description: We use anonymous analytics. No cookies.
-    actions:
-      - accept
-      - reject
 
 nav:
   - Home: index.md
@@ -84,6 +77,3 @@ markdown_extensions:
   - pymdownx.details
   - toc:
       permalink: true
-
-extra_javascript:
-  - https://plausible.io/js/script.js
